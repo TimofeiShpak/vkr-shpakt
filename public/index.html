@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Нагрузка преподавателей</title>
+
+    <link rel="stylesheet" href="libraries/jquery.dataTables.css">
+    <link rel="stylesheet" href="libraries/select.dataTables.min.css">
+    <link rel="stylesheet" href="libraries/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div class="loader hide" id="loader">
+        <div class="ring">загрузка
+            <span class="ring-span"></span>
+        </div>
+    </div>
+
+    <div id="modalConfirm" class="modal fade bd-example-modal-lg modalConfirm" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Подтверждение</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="modalConfirmText"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="modalConfirmCancel">отмена</button>
+                    <button class="btn btn-primary" id="modalConfirmSubmit">да</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalLogIn" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Вход</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="modalLogInError" class="error hide">неправильный логин или пароль</div>
+                    <div>
+                        <label>Логин</label>
+                        <input id="loginInput">
+                    </div>
+                    <div id="modalLoginErrorInput" class="error hide">введите логин</div>
+                    <div>
+                        <label>Пароль</label>
+                        <input id="passwordInput">
+                    </div>
+                    <div id="modalPasswordErrorInput" class="error hide">введите пароль</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="loginInBtn">войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="hide">
+        <header class="header">
+            <div id="tabs" class="tabs">
+                <div id="programsTab" class="tab">Дисциплины</div>
+                <div id="teachersTab" class="tab">Преподаватели</div>
+            </div>
+            <div class="user">
+                <div class="userInfo" id="userInfo"></div>
+                <button class="btn btn-secondary" id="logOutBtn">выйти</button>
+            </div>
+        </header>
+        <div id="programsPage" class="hide page">
+            <div id="modalSelectTeacher" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalTitle">Редактирование</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div id="selectTeacherForm">
+                                <div class="modal-item">
+                                    <label for="selectTeacher">Выберете преподавателя</label>
+                                    <select id="selectTeacher"></select>
+                                </div>
+                                <div class="modal-item">
+                                    <label for="selectModeWork">Выберете вид работ</label>
+                                    <form id="selectModeWork" class="selectModeWork">
+                                        <div id="lectureOption">
+                                            <input type="checkbox" value="lecture" id="lecture">
+                                            <label>лекции</label>
+                                        </div>
+                                        <div id="laboratoryOption">
+                                            <input type="checkbox" value="laboratory" id="laboratory">
+                                            <label>лабораторные работы</label>
+                                        </div>
+                                        <div id="practiseOption">
+                                            <input type="checkbox" value="practise" id="practise">
+                                            <label>практика</label>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="selectTeacherFields"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="closeModal">отмена</button>
+                            <button class="btn btn-danger" id="deleteRowModal">удалить</button>
+                            <button class="btn btn-primary" id="saveDataModal">сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tableWrapper" class="hide">
+                <div>
+                    <span id="nameProgram"></span>
+                    <button class="btn btn-primary chooseProgram" id="chooseProgram">Вернуться назад</button>
+                    <button id="visibleColumnsButton" class="btn btn-primary visibleColumnsButton">
+                        Отображение столбцов
+                    </button>
+                    <button class="btn btn-primary addRow" id="addRow">Добавить строку</button>
+                </div>
+                <div id="tableVisibleMenu"></div>
+                <table class="display" id="example"></table>
+            </div>
+
+            <div id="saveNewProgram" class="saveNewProgram center hide">
+                <div>
+                    <div>
+                        <label for="programNameInput">Название программы</label>
+                        <input id="programNameInput">
+                        <div id="programNameInputError" class="error"></div>
+                    </div>
+                    <div id="saveNewProgramOptions" class="hide">
+                        <div>
+                            <input type="file" id="fileUploader"/>
+                        </div>
+                        <button class="btn btn-primary" id="saveNewProgramBtn">сохранить программу</button>
+                    </div>
+                    <button class="btn btn-primary" id="saveProgramBtn">сохранить программу</button>
+                    <button class="btn btn-secondary" id="cancelAddProgramBtn">отмена</button>
+                </div>
+            </div>
+
+            <div id="programs" class="hide center">
+                <div>Программы</div>
+                <div id="notProgram">Данные отсутствуют</div>
+                <div id="programsContainer"></div>
+                <button class="btn btn-primary" id="addNewProgram">Добавить новую программу</button>
+                <button class="btn btn-primary" id="downloadAllPrograms">Скачать все программы</button>
+            </div>
+
+            <div id="teacherSubjects" class="hide center teacherSubjects">
+                <div>Преподаватели</div>
+                <div id="notTeacherSubjects">Данные отсутствуют</div>
+                <div id="teacherSubjectsContainer"></div>
+            </div>
+        </div>
+
+        <div id="teachersPage" class="hide page">
+            <button id="showModalTeacherBtn" type="button" class="btn btn-primary">
+                Добавить преподавателя
+            </button>
+
+            <div id="addTeacherModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="teacherModalLabel">Добавление преподавателя</h5>
+                        </div>
+                        <div id="modalEditTeacher">
+                            <div class="modal-body">
+                                <div id="addTeacherModalError" class="error"></div>
+                                <div id="addTeacherInfoModal">
+                                    <div class="modal-teacher-field">
+                                        <label for="inputNameTeacher">ФИО</label>
+                                        <input id="inputNameTeacher" class="inputNameTeacher"/>
+                                    </div>
+                                    <div id="inputNameTeacherError" class="error"></div>
+                                    <div class="modal-teacher-field">
+                                        <label for="inputMaxHoursTeacher">максимальное количество часов</label>
+                                        <input id="inputMaxHoursTeacher" type="number" min="0"/>
+                                    </div>
+                                    <div id="inputMaxHoursTeacherError" class="error"></div>
+                                </div>
+                                <div id="addTeacherProfileModal" class="addTeacherProfileModal">
+                                    <div class="modal-teacher-field">
+                                        <label for="inputLoginTeacher">логин</label>
+                                        <input id="inputLoginTeacher"/>
+                                    </div>
+                                    <div id="inputLoginTeacherError" class="error"></div>
+                                    <div class="modal-teacher-field">
+                                        <label for="inputPasswordTeacher">пароль</label>
+                                        <input id="inputPasswordTeacher"/>
+                                    </div>
+                                    <div id="inputPasswordTeacherError" class="hide error">укажите пароль</div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="hideModalTeacherBtn">отмена</button>
+                                <button type="button" class="btn btn-danger" id="deleteTeacherBtn">удалить</button>
+                                <button type="button" class="btn btn-primary" id="seeTeacherProfileBtn">посмотреть логин и пароль</button>
+                                <button type="button" class="btn btn-primary" id="saveNewTeacherBtn">сохранить</button>
+                            </div>
+                        </div>
+                        <div id="modalViewTeacher">
+                            <div class="modal-body">
+                                <div id="loginTeacherView"></div>
+                                <div id="passwordTeacherView"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="cancelModalTeacherBtn">назад</button>
+                                <button type="button" class="btn btn-primary" id="changeModalTeacherBtn">изменить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="tableTeachers" id="tableTeachers"></table>
+        </div>
+
+    </div>
+
+    <script src="libraries/xlsx.full.min.js"></script>
+    <script src="libraries/jquery.min.js"></script>
+    <script src="libraries/dataTables.min.js"></script>
+    <script src="libraries/dataTables.buttons.min.js"></script>
+    <script src="libraries/jszip.js"></script>
+    <script src="libraries/buttons.html5.min.js"></script>
+    <script src="libraries/dataTables.select.min.js"></script>
+    <script src="libraries/bootstrap.min.js"></script>
+    <script src="libraries/bootstrap.js"></script>
+    <script src="libraries/poper.min.js"></script>
+    <script src="index.js" type="module"></script>
+    
+</body>
+</html>
